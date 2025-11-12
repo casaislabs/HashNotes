@@ -22,7 +22,7 @@ export default function NotePanel() {
     }
   });
   const [hydrated, setHydrated] = useState(false);
-  const [appOnly, setAppOnly] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(3);
   useEffect(() => {
     const id = setTimeout(() => setHydrated(true), 0);
     return () => clearTimeout(id);
@@ -33,7 +33,7 @@ export default function NotePanel() {
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch(`/api/notes?limit=20&includeText=false&appOnly=${appOnly ? "true" : "false"}`, { signal: controller.signal });
+        const res = await fetch(`/api/notes?limit=20&includeText=false&appOnly=false`, { signal: controller.signal });
         if (!res.ok) return;
         const json = await res.json();
         const remote = Array.isArray(json.items) ? (json.items as unknown[]) : [];
@@ -59,7 +59,7 @@ export default function NotePanel() {
       } catch {}
     })();
     return () => controller.abort();
-  }, [hydrated, appOnly]);
+  }, [hydrated]);
 
   const onCreated = (note: Note) => {
     setNotes((prev) => {
@@ -71,19 +71,18 @@ export default function NotePanel() {
 
   return (
     <div className="mx-auto max-w-6xl px-6">
-      <div className="mt-8 mb-2 flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <input
-            type="checkbox"
-            checked={!appOnly}
-            onChange={(e) => setAppOnly(!e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600"
-          />
-          Show all gateway files
-        </label>
-      </div>
       <NoteForm onCreated={onCreated} />
-      <NotesList notes={hydrated ? notes : []} />
+      <NotesList notes={hydrated ? notes.slice(0, visibleCount) : []} />
+      {hydrated && visibleCount < notes.length && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => setVisibleCount((c) => Math.min(c + 3, notes.length))}
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-black/5 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-white/10"
+          >
+            Show more
+          </button>
+        </div>
+      )}
     </div>
   );
 }
