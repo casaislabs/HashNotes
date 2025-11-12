@@ -11,7 +11,7 @@ export function proxy(request: NextRequest) {
       "form-action 'self'",
       "img-src 'self' data: " + gateway,
       "script-src 'self' 'nonce-" + nonce + "'",
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'nonce-" + nonce + "'",
       "font-src 'self'",
       "connect-src 'self'",
       "upgrade-insecure-requests",
