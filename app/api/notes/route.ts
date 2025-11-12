@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
           if (includeText) {
             try {
               const resp = await pinata.gateways.public.get(f.cid as string);
-              const data = resp.data as any;
+              const data: unknown = resp.data;
               if (typeof data === "string") text = data;
               else if (data && typeof data === "object") text = JSON.stringify(data);
             } catch {
