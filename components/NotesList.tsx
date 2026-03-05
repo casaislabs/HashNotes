@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Note } from "@/types/note";
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
 };
 
 export default function NotesList({ notes }: Props) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const previewLimit = 320;
   return (
     <ul className="mt-8 space-y-4">
       {notes.length === 0 ? (
@@ -33,12 +36,29 @@ export default function NotesList({ notes }: Props) {
                 </button>
               </div>
             </div>
-          {n.text ? (
-            <p className="mt-3 whitespace-pre-wrap text-slate-900 dark:text-slate-100">{n.text}</p>
-          ) : (
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">No preview</p>
-          )}
-            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">CID: {n.cid}</div>
+            {n.text ? (
+              <>
+                <p className="mt-3 whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100">
+                  {expanded[n.cid] || n.text.length <= previewLimit ? n.text : `${n.text.slice(0, previewLimit)}…`}
+                </p>
+                {n.text.length > previewLimit && (
+                  <button
+                    onClick={() =>
+                      setExpanded((prev) => ({
+                        ...prev,
+                        [n.cid]: !prev[n.cid],
+                      }))
+                    }
+                    className="mt-2 text-sm font-medium text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
+                  >
+                    {expanded[n.cid] ? "See less" : "See more"}
+                  </button>
+                )}
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">No preview</p>
+            )}
+            <div className="mt-2 break-all text-xs text-slate-500 dark:text-slate-400">CID: {n.cid}</div>
           </li>
         ))
       )}
